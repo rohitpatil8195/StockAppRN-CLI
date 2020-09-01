@@ -3,7 +3,7 @@ import {
   Text,
   FlatList,
   View,
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
 } from "react-native";
 import firebase from "firebase";
@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 var name = "";
 class StocksList extends Component {
- 
+
   constructor() {
     super();
     this.database = firebase
@@ -23,7 +23,7 @@ class StocksList extends Component {
     this.state = {
       data: [],
       userWatchList: [],
-      _isMounted : false
+      _isMounted: false
     };
   }
 
@@ -60,9 +60,9 @@ class StocksList extends Component {
     });
 
     this.setState({
-      _isMounted : true
+      _isMounted: true
     })
-    if (this.props.stockname.length >= 3  && this.state._isMounted) {
+    if (this.props.stockname.length >= 3 && this.state._isMounted) {
       this.stockSearch(this.props.stockname);
     }
   }
@@ -79,11 +79,12 @@ class StocksList extends Component {
 
   componentWillUnmount() {
     this.setState({
-      _isMounted : false
+      _isMounted: false
     })
   }
 
   selectedStokData = (items) => {
+    console.log("data :- ",items);
     let shortToast = (message) => {
       Toast.show(message, {
         duration: Toast.durations.LONG,
@@ -194,7 +195,7 @@ class StocksList extends Component {
         alignSelf: "flex-end",
         justifyContent: "flex-end",
         position: "absolute",
-        top: 5,
+        top: 2,
         right: 20,
         fontSize: 35,
         color: "#3598DB",
@@ -203,7 +204,7 @@ class StocksList extends Component {
       iconsCheck: {
         alignSelf: "flex-end",
         position: "absolute",
-        top: 5,
+        top: 2,
         right: 20,
         fontSize: 35,
         color: "green",
@@ -221,19 +222,20 @@ class StocksList extends Component {
               <Text style={style.Symbol}>
                 {item.TradeSym_t} <Text style={style.Exch}>{item._Exch_s}</Text>{" "}
               </Text>
-              <TouchableOpacity>
+
 
               {this.isAlreadyAdded(item) ? (
                 <Icon style={style.iconsCheck} name="check"></Icon>
               ) : (
-                <Icon
-                  style={style.icons}
-                  onPress={() => this.selectedStokData(item)}
-                  name="plus"
-                ></Icon>
-              )}
 
-              </TouchableOpacity>
+
+                  <TouchableWithoutFeedback onPress={() => this.selectedStokData(item)}>
+                    <Icon
+                      style={style.icons}
+                      name="plus"
+                    ></Icon>
+                  </TouchableWithoutFeedback>
+                )}
               <Text style={style.CompName_t}>{item.CompName_t} </Text>
               <Text style={style.horizontalLine}></Text>
             </View>

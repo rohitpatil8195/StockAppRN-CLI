@@ -8,6 +8,8 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { GoogleSignin, statusCodes } from 'react-native-google-signin';
+
 //import { FontAwesome5 } from "@expo/vector-icons";
 import firebase from "firebase";
 import _ from "lodash";
@@ -26,10 +28,21 @@ import Loader from "./loader";
 // };
 
 class LoginScreen extends Component {
-  // constructor() {
-  //   super();
-  //   console.ignoredYellowBox = ["Setting a timer"];
-  // }
+  constructor() {
+    super();
+  }
+
+  componentDidMount() {
+    GoogleSignin.configure({
+      webClientId: "958420409934-h1ueiag5q9ca7d3q4u830g9kjn3c62to.apps.googleusercontent.com",
+      // androidClientId:
+      //   "958420409934-c6vqjtpcd4htva3ad9i836q0c4lkml57.apps.googleusercontent.com",
+      // iosClientId:
+      //   "958420409934-n4kl3b1s5t801uri6qbnu60krnctu50p.apps.googleusercontent.com",
+      scopes: ["profile", "email"],
+    })
+  }
+
   shortToast = (message) => {
     Toast.show(message, {
       duration: Toast.durations.LONG,
@@ -74,7 +87,7 @@ class LoginScreen extends Component {
       for (var i = 0; i < providerData.length; i++) {
         if (
           providerData[i].providerId ===
-            firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
+          firebase.auth.GoogleAuthProvider.PROVIDER_ID &&
           providerData[i].uid === googleUser.getBasicProfile().getId()
         ) {
           // We don't need to reauth the Firebase connection.
@@ -149,41 +162,120 @@ class LoginScreen extends Component {
     );
   };
 
-  // signInWithGoogleAsync = async () => {
-  //   this.setState({
-  //     loading: true,
-  //   });
-  //   try {
-  //     const result = await Google.logInAsync({
-  //       androidClientId:
-  //         "958420409934-c6vqjtpcd4htva3ad9i836q0c4lkml57.apps.googleusercontent.com",
-  //       iosClientId:
-  //         "958420409934-n4kl3b1s5t801uri6qbnu60krnctu50p.apps.googleusercontent.com",
-  //       scopes: ["profile", "email"],
-  //     });
+  _signIn = () => {
+    try {
+      this.setState({
+        loading: true,
+      });
 
-  //     if (result.type === "success") {
-  //       this.onSignIn(result);
-  //       setTimeout(() => {
-  //         this.setState({
-  //           loading: false,
-  //         });
-  //         this.shortToast("Login Success!");
-  //       }, 1000);
-  //       return result.accessToken;
-  //     } else {
-  //       this.setState({
-  //         loading: false,
-  //       });
-  //       return { cancelled: true };
-  //     }
-  //   } catch (e) {
-  //     this.setState({
-  //       loading: false,
-  //     });
-  //     return { error: true };
-  //   }
-  // };
+      GoogleSignin.signIn().then((data) => {
+        // create a new firebase credential with the token
+        //this.onSignIn(data)
+        //console.log(data);
+        const credential = firebase.auth.GoogleAuthProvider.credential(data.idToken, data.accessToken);
+        // login with credential
+        return firebase.auth().signInWithCredential(credential);
+      }).then((currentUser) => {
+          console.log(`Google Login with user : ${JSON.stringify(currentUser.toJSON())}`);
+        })
+        .catch((error) => {
+          console.log(`Login fail with error: ${error}`);
+        });
+
+      // let result = await GoogleSignin.signIn();
+      // result.then((data) => {
+      //   console.log(data)
+      //   
+      //   return data.accessToken
+      // })
+    } catch (error) {
+      alert(error);
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        alert('Cancel');
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        alert('Signin in progress');
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        alert('PLAY_SERVICES_NOT_AVAILABLE');
+        // play services not available or outdated
+      } else {
+        // some other error happened
+      }
+      this.setState({
+        loading: false,
+      });
+      return { cancelled: true };
+    }
+  };
+
+  signInWithGoogleAsync = async () => {
+    console.log("calledhgh")
+
+    this.setState({
+      loading: true,
+    });
+    console.log(this.state.loading)
+    try {
+      GoogleSignin.configure({
+        webClientId: "958420409934-h1ueiag5q9ca7d3q4u830g9kjn3c62to.apps.googleusercontent.com", // client ID of type WEB for your server(needed to verify user ID and offline access)
+        offlineAccess: true,
+        scopes: ["profile", "email"],
+      });
+      // await GoogleSignin.hasPlayServices();
+      GoogleSignin.signIn().then((result) => {
+        setTimeout(() => {
+          console.warn({ userInfo: result });
+          console.log("result - ", result);
+          if (result.type === "success") {
+            //this.onSignIn(result);
+            setTimeout(() => {
+              this.setState({
+                loading: false,
+              });
+              this.shortToast("Login Success!");
+            }, 1000);
+            return result.accessToken;
+          } else {
+            this.setState({
+              loading: false,
+            });
+            return { cancelled: true };
+          }
+        }, 3000)
+      })
+
+
+      // const result = await GoogleSignin.logInAsync({
+      //   androidClientId:
+      //     "958420409934-c6vqjtpcd4htva3ad9i836q0c4lkml57.apps.googleusercontent.com",
+      //   iosClientId:
+      //     "958420409934-n4kl3b1s5t801uri6qbnu60krnctu50p.apps.googleusercontent.com",
+      //   scopes: ["profile", "email"],
+      // });
+
+    } catch (error) {
+      alert(error)
+      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+        this.setState({
+          loading: false,
+        });
+        return { error: true };
+
+      } else if (error.code === statusCodes.IN_PROGRESS) {
+        alert('Signin in progress');
+        // operation (f.e. sign in) is in progress already
+      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        alert('PLAY_SERVICES_NOT_AVAILABLE');
+        // play services not available or outdated
+      } else {
+        this.setState({
+          loading: false,
+        });
+        return { error: true };
+      }
+    };
+  }
 
   //    renderButton(){
   //      if(this.state.loading === true){
@@ -246,7 +338,7 @@ class LoginScreen extends Component {
         </TouchableOpacity>
         <TouchableOpacity
           style={{ marginTop: 10 }}
-          onPress={() => this.signInWithGoogleAsync()}
+          onPress={this._signIn}
         >
           <Text style={{ fontWeight: "bold", fontSize: 16, color: "#3498DB" }}>
             Sign In With Google

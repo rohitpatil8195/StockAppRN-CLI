@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "386562430159",
+    "firebase_url": "https://stockrncli.firebaseio.com",
+    "project_id": "stockrncli",
+    "storage_bucket": "stockrncli.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:386562430159:android:310c5f9f061716c15813ba",
+        "android_client_info": {
+          "package_name": "com.stockrn.stockwatch"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "386562430159-v4shdi68olufehfd22khqpil9uhqjb3k.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBP6PMagN6YlCA1-l0Ih8x0XiRycrbzBYw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "386562430159-v4shdi68olufehfd22khqpil9uhqjb3k.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

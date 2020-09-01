@@ -12,13 +12,14 @@
 
 import React, { Component, useState } from "react";
 import {
-  TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   Text,
   View,
   FlatList,
   Image,
   Alert,
+  Animated
 } from "react-native";
 //import { FAB, TouchableRipple } from "react-native-paper";
 import ActionButton from "react-native-circular-action-menu";
@@ -30,6 +31,7 @@ import firebase from "firebase";
 import { firebaseConfig } from "../config";
 import Swipeable from "react-native-swipeable";
 import Toast from "react-native-root-toast";
+import { YellowBox } from 'react-native';
 
 // const actions = [
 //   {
@@ -45,7 +47,7 @@ class stockWebSocket extends Component {
   //   title: navigation.state.params.name + "'s Profile!",
   //   headerRight: <Button color={screenProps.tintColor} {...} />,
   // });
-
+  animatedValue = new Animated.Value(0);
   websocket = new WebSocket(firebaseConfig.websocket);
   constructor() {
     super();
@@ -109,7 +111,15 @@ class stockWebSocket extends Component {
   };
 
   componentDidMount() {
+    Animated.timing(this.animatedValue,
+      {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true
+      }).start();
+    YellowBox.ignoreWarnings(['Animated: `useNativeDriver`']);
     this.props.navigation.addListener("focus", () => {
+
       this.websocket = new WebSocket(firebaseConfig.websocket);
       console.log("Screen.js focused");
       this.websocket.binaryType = "arraybuffer";
@@ -298,8 +308,8 @@ class stockWebSocket extends Component {
 
   componentDidUpdate() {
     if (this.state._isConnected) {
-    //   this.setState({});
-    // this.websocket.close();
+      //   this.setState({});
+      // this.websocket.close();
     }
   }
 
@@ -412,7 +422,7 @@ class stockWebSocket extends Component {
       .update({
         watchlist: new_watchlist,
       })
-      .then(() => {});
+      .then(() => { });
     let shortToast = (message) => {
       Toast.show(message, {
         duration: Toast.durations.LONG,
@@ -424,11 +434,11 @@ class stockWebSocket extends Component {
 
   rightAction = (item) => {
     return [
-      <TouchableOpacity onPress={() => this.deleteScrip(item)}>
+      <TouchableWithoutFeedback onPress={() => this.deleteScrip(item)}>
         <View style={styles.delView}>
           <Text style={styles.delBtn}>delete</Text>
         </View>
-      </TouchableOpacity>,
+      </TouchableWithoutFeedback>,
     ];
   };
 
@@ -469,11 +479,11 @@ class stockWebSocket extends Component {
                               {item.CUR_LTP}
                             </Text>
                           ) : (
-                            <Text style={{ color: "red", fontSize: 17 }}>
-                              <Text>₹ </Text>
-                              {item.CUR_LTP}
-                            </Text>
-                          )}
+                              <Text style={{ color: "red", fontSize: 17 }}>
+                                <Text>₹ </Text>
+                                {item.CUR_LTP}
+                              </Text>
+                            )}
                         </View>
                         <View>
                           <Text style={{ fontSize: 13, color: "#3598DB" }}>
@@ -486,30 +496,30 @@ class stockWebSocket extends Component {
                   )}
                 />
               ) : (
-                <View style={styles.noDataView}>
-                  <Image
-                    style={{ height: "50%", marginTop: "35%", width: "90%" }}
-                    source={require("../assets/empty.gif")}
-                  />
-                  <Text style={styles.noDataText}>
-                    You Don't Have any added script
+                  <View style={styles.noDataView}>
+                    <Image
+                      style={{ height: "50%", marginTop: "35%", width: "90%" }}
+                      source={require("../assets/empty.gif")}
+                    />
+                    <Text style={styles.noDataText}>
+                      You Don't Have any added script
                   </Text>
-                </View>
-              )}
+                  </View>
+                )}
             </View>
           ) : (
-            <View style={styles.noDataView}>
-               <FontAwesome style={styles.noDataIcon} name="file-o" />
-              <Image
-                style={{ height: "60%", marginTop: "30%", width: "90%" }}
-                source={require("../assets/somethingWrong.png")}
-              />
-              <Text style={styles.noDataText}>Connection lost !!!</Text>
-              <Text style={styles.noDataText}>
-                Please refresh the application
+              <View style={styles.noDataView}>
+                <FontAwesome style={styles.noDataIcon} name="file-o" />
+                <Image
+                  style={{ height: "60%", marginTop: "30%", width: "90%" }}
+                  source={require("../assets/somethingWrong.png")}
+                />
+                <Text style={styles.noDataText}>Connection lost !!!</Text>
+                <Text style={styles.noDataText}>
+                  Please refresh the application
               </Text>
-            </View>
-          )}
+              </View>
+            )}
         </View>
         <ActionButton buttonColor="#3498DB" position="right">
           <ActionButton.Item
